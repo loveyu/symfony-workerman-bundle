@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\Symfony\WorkermanBundle\Contracts;
 
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -9,7 +11,7 @@ use Workerman\Connection\ConnectionInterface;
 interface BufferAwareInterface
 {
     /**
-     * 缓冲区满了
+     * 缓冲区满了.
      *
      * @see https://manual.workerman.net/doc/zh-cn/worker/on-buffer-full.html
      */

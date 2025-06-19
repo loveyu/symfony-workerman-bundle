@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\Symfony\WorkermanBundle\Contracts;
 
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -9,27 +11,27 @@ use Workerman\Connection\ConnectionInterface;
 interface ConnectableInterface
 {
     /**
-     * 协议，如 tcp/udp
+     * 协议，如 tcp/udp.
      */
     public function getTransport(): string;
 
     /**
-     * 返回协议类
+     * 返回协议类.
      */
     public function getProtocolClass(): ?string;
 
     /**
-     * 监听IP，一般是127.0.0.1或0.0.0.0
+     * 监听IP，一般是127.0.0.1或0.0.0.0.
      */
     public function getListenIp(): string;
 
     /**
-     * 监听端口
+     * 监听端口.
      */
     public function getListenPort(): int;
 
     /**
-     * 有连接时触发
+     * 有连接时触发.
      *
      * @see https://manual.workerman.net/doc/zh-cn/worker/on-connect.html
      */
@@ -43,14 +45,14 @@ interface ConnectableInterface
     public function onClose(ConnectionInterface $connection): void;
 
     /**
-     * 收到消息
+     * 收到消息.
      *
      * @see https://manual.workerman.net/doc/zh-cn/worker/on-message.html
      */
-    public function onMessage(ConnectionInterface $connection, string $buffer): void;
+    public function onMessage(ConnectionInterface $connection, mixed $request): void;
 
     /**
-     * 连接发生错误
+     * 连接发生错误.
      *
      * @see https://manual.workerman.net/doc/zh-cn/worker/on-error.html
      */

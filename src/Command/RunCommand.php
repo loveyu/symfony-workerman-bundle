@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\Symfony\WorkermanBundle\Command;
 
 use Fidry\CpuCoreCounter\CpuCoreCounter;
@@ -9,7 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\BufferAwareInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\ConnectableInterface;
@@ -23,10 +25,18 @@ class RunCommand extends Command
 {
     public const NAME = 'workerman:run';
 
+    /**
+     * @param KernelInterface                         $kernel
+     * @param iterable<WorkerBuilderInterface|object> $workerBuilders
+     * @param iterable<TimerInterface|object>         $timers
+     * @param CpuCoreCounter                          $cpuCoreCounter
+     */
     public function __construct(
         private readonly KernelInterface $kernel,
-        #[TaggedIterator(WorkerBuilderInterface::WORKER_SERVICE_TAG)] private readonly iterable $workerBuilders,
-        #[TaggedIterator(TimerInterface::SERVICE_TAG)] private readonly iterable $timers,
+        #[AutowireIterator(WorkerBuilderInterface::WORKER_SERVICE_TAG)]
+        private readonly iterable $workerBuilders,
+        #[AutowireIterator(TimerInterface::SERVICE_TAG)]
+        private readonly iterable $timers,
         private readonly CpuCoreCounter $cpuCoreCounter,
     ) {
         parent::__construct();
@@ -40,12 +50,11 @@ class RunCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        Worker::$pidFile = $this->kernel->getCacheDir() . '/workerman.pid';
-        Worker::$logFile = $this->kernel->getCacheDir() . '/workerman.log';
+        Worker::$pidFile = $this->kernel->getCacheDir().'/workerman.pid';
+        Worker::$logFile = $this->kernel->getCacheDir().'/workerman.log';
 
         foreach ($this->workerBuilders as $builder) {
             /** @var WorkerBuilderInterface $builder */
-
             if ($builder instanceof ConnectableInterface) {
                 $worker = new Worker("{$builder->getTransport()}://{$builder->getListenIp()}:{$builder->getListenPort()}");
             } else {
@@ -58,7 +67,7 @@ class RunCommand extends Command
             // 基础部分
             $worker->onWorkerStart = function (Worker $worker) use ($builder) {
                 foreach ($this->timers as $timer) {
-                    assert($timer instanceof TimerInterface);
+                    \assert($timer instanceof TimerInterface);
                     new Crontab($timer->getExpression(), $timer->execute(...));
                 }
                 $builder->onWorkerStart($worker);
@@ -66,7 +75,7 @@ class RunCommand extends Command
             $worker->onWorkerStop = $builder->onWorkerStop(...);
             $worker->onWorkerReload = function (Worker $worker) use ($builder) {
                 foreach ($this->timers as $timer) {
-                    assert($timer instanceof TimerInterface);
+                    \assert($timer instanceof TimerInterface);
                     new Crontab($timer->getExpression(), $timer->execute(...));
                 }
                 $builder->onWorkerReload($worker);

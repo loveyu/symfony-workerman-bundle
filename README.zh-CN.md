@@ -5,7 +5,7 @@ Workerman模块
 ## 安装
 
 ```bash
-composer require tourze/symfony-workerman-bundle
+composer require loveyu/symfony-workerman-bundle
 ```
 
 ## 使用方法
