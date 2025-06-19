@@ -4,7 +4,7 @@
   "type": "symfony-bundle",
   "license": "MIT",
   "require": {
-    "php": "^8.4",
+    "php": "^8.3",
     "fidry/cpu-core-counter": "^1.2",
     "phpinnacle/buffer": "^1.2",
     "symfony/config": "^7.0",
