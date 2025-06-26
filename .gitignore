@@ -2,9 +2,15 @@ var/
 vendor/
 .idea/
 .phpunit.cache/
+.bin/
 composer.lock
 .php-cs-fixer.cache
 .phpunit.result.cache
 phpunit.xml
 *.cache
 *.log
+
+.phpstan-cache/
+phpstan.dist.neon
+.php-cs-fixer.dist.php
+psalm.xml

@@ -16,6 +16,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\BufferAwareInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\ConnectableInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\TimerInterface;
+use Tourze\Symfony\WorkermanBundle\Contracts\WorkerBuilderCountInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\WorkerBuilderInterface;
 use Workerman\Crontab\Crontab;
 use Workerman\Worker;
@@ -61,6 +62,9 @@ class RunCommand extends Command
                 $worker = new Worker();
             }
             $worker->count = $this->cpuCoreCounter->getCount();
+            if ($builder instanceof WorkerBuilderCountInterface) {
+                $worker->count = $builder->getCount();
+            }
             $worker->name = $builder->getName();
             $worker->protocol = null;
 

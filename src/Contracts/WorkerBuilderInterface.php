@@ -10,7 +10,7 @@ use Workerman\Worker;
 #[AutoconfigureTag(WorkerBuilderInterface::WORKER_SERVICE_TAG)]
 interface WorkerBuilderInterface
 {
-    public const WORKER_SERVICE_TAG = 'workerman.worker';
+    public const string WORKER_SERVICE_TAG = 'workerman.worker';
 
     /**
      * 服务名.
