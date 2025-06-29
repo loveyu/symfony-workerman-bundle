@@ -17,6 +17,7 @@ use Tourze\Symfony\WorkermanBundle\Contracts\BufferAwareInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\ConnectableInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\TimerInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\WorkerBuilderCountInterface;
+use Tourze\Symfony\WorkermanBundle\Contracts\WorkerBuilderEnableInterface;
 use Tourze\Symfony\WorkermanBundle\Contracts\WorkerBuilderInterface;
 use Workerman\Crontab\Crontab;
 use Workerman\Worker;
@@ -56,6 +57,13 @@ class RunCommand extends Command
 
         foreach ($this->workerBuilders as $builder) {
             /** @var WorkerBuilderInterface $builder */
+            if ($builder instanceof WorkerBuilderEnableInterface) {
+                /** @noinspection NestedPositiveIfStatementsInspection */
+                if (!$builder->isEnable()) {
+                    continue;
+                }
+            }
+
             if ($builder instanceof ConnectableInterface) {
                 $worker = new Worker("{$builder->getTransport()}://{$builder->getListenIp()}:{$builder->getListenPort()}");
             } else {
