@@ -31,6 +31,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extension-csv: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, iconv, json, mbstring, pdo, tokenizer
+          coverage: none
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
