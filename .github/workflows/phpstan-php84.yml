@@ -1,4 +1,4 @@
-name: Composer Require Check
+name: PHPStan Check
 
 on:
   push:
@@ -35,11 +35,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extension: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, iconv, json, mbstring, pdo, tokenizer
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, iconv, json, mbstring, pdo, tokenizer
           coverage: none
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: ComposerRequireChecker
-        uses: docker://ghcr.io/webfactory/composer-require-checker:4.16.1
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse src -l 10
