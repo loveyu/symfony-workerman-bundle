@@ -1,8 +1,18 @@
-# Workerman模块
+# Symfony Workerman Bundle
+
+基于 [Workerman](https://www.workerman.net/) 的 Symfony 集成模块，提供了在 Symfony 应用中使用 Workerman 高性能异步网络通信框架的能力。该模块通过抽象接口和服务标签系统，实现了 Workerman 与 Symfony 依赖注入容器的无缝集成。
+
+## 安装
+
+```bash
+composer require loveyu/symfony-workerman-bundle
+```
+
+**支持版本：**
+- Symfony 8.0+
+- PHP 8.4+
 
 ## 核心功能与技术原理
-
-WorkermanBundle 是基于 [Workerman](https://www.workerman.net/) 的 Symfony 集成模块，提供了在 Symfony 应用中使用 Workerman 高性能异步网络通信框架的能力。该模块通过抽象接口和服务标签系统，实现了 Workerman 与 Symfony 依赖注入容器的无缝集成。
 
 核心功能包括：
 
@@ -66,6 +76,126 @@ graph TD
     F[CpuCoreCounter] -->|提供| A
 ```
 
+## 使用方法
+
+### 基本用法
+
+1. 创建实现 `WorkerBuilderInterface` 接口的服务：
+
+```php
+use Loveyu\WorkermanBundle\Worker\WorkerBuilderInterface;
+
+class MyWorker implements WorkerBuilderInterface
+{
+    public function getName(): string
+    {
+        return 'my_worker';
+    }
+
+    public function onWorkerStart(\Workerman\Worker $worker): void
+    {
+        // Worker 启动时的初始化逻辑
+        echo "Worker started\n";
+    }
+
+    public function onWorkerStop(\Workerman\Worker $worker): void
+    {
+        // Worker 停止时的清理逻辑
+        echo "Worker stopped\n";
+    }
+
+    public function onWorkerReload(\Workerman\Worker $worker): void
+    {
+        // Worker 重载时的处理逻辑
+        echo "Worker reloaded\n";
+    }
+}
+```
+
+2. 注册为 Symfony 服务：
+
+```yaml
+# config/services.yaml
+services:
+    App\Workerman\MyWorker:
+        tags:
+            - { name: 'workerman.worker' }
+```
+
+3. 启动 Workerman 服务：
+
+```bash
+php bin/console workerman:run
+```
+
+### 网络服务示例
+
+```php
+use Loveyu\WorkermanBundle\Worker\{WorkerBuilderInterface, ConnectableInterface};
+
+class TcpServer implements WorkerBuilderInterface, ConnectableInterface
+{
+    public function getName(): string
+    {
+        return 'tcp_server';
+    }
+
+    public function getTransport(): string
+    {
+        return 'tcp';
+    }
+
+    public function getListenIp(): string
+    {
+        return '0.0.0.0';
+    }
+
+    public function getListenPort(): int
+    {
+        return 8080;
+    }
+
+    public function onConnect(\Workerman\Connection\TcpConnection $connection): void
+    {
+        echo "New connection from {$connection->getRemoteIp()}\n";
+    }
+
+    public function onMessage(\Workerman\Connection\TcpConnection $connection, string $data): void
+    {
+        $connection->send("Echo: " . $data);
+    }
+
+    public function onClose(\Workerman\Connection\TcpConnection $connection): void
+    {
+        echo "Connection closed\n";
+    }
+
+    public function onWorkerStart(\Workerman\Worker $worker): void {}
+    public function onWorkerStop(\Workerman\Worker $worker): void {}
+    public function onWorkerReload(\Workerman\Worker $worker): void {}
+    public function onError(\Workerman\Connection\TcpConnection $connection, int $code, string $msg): void {}
+}
+```
+
+### 定时任务示例
+
+```php
+use Loveyu\WorkermanBundle\Timer\TimerInterface;
+
+class MyTimer implements TimerInterface
+{
+    public function getExpression(): string
+    {
+        return '*/5 * * * *'; // 每5分钟执行一次
+    }
+
+    public function execute(): void
+    {
+        echo "Timer executed at " . date('Y-m-d H:i:s') . "\n";
+    }
+}
+```
+
 ## 扩展机制
 
 Bundle 采用标签自动配置机制实现扩展：
@@ -76,6 +206,35 @@ Bundle 采用标签自动配置机制实现扩展：
 4. 实现 `TimerInterface` 的服务会自动被标记为 `workerman.timer`
 
 开发者只需实现相应接口，服务会被自动发现并集成到 Workerman 运行时中。
+
+## 配置
+
+### 基本配置
+
+```yaml
+# config/packages/workerman.yaml
+workerman:
+    workers:
+        # 自定义 Worker 配置
+        app_worker:
+            class: App\Workerman\MyWorker
+            count: 4  # 进程数量
+
+    timers:
+        # 自定义定时任务配置
+        my_timer:
+            class: App\Workerman\MyTimer
+```
+
+### 高级配置
+
+```yaml
+workerman:
+    pid_file: '%kernel.project_dir%/var/workerman.pid'
+    log_file: '%kernel.project_dir%/var/log/workerman.log'
+    worker_count: auto  # 自动检测CPU核心数
+    reloadable: true
+```
 
 ## 依赖关系
 
@@ -99,3 +258,9 @@ Bundle 采用标签自动配置机制实现扩展：
   - 合理设置 Worker 进程数，避免过多进程导致系统资源耗尽
   - 对于 CPU 密集型任务，建议保持 Worker 数量等于 CPU 核心数
   - 对于 IO 密集型任务，可适当增加 Worker 数量
+
+## 参考文档
+
+- [Workerman 官方文档](https://www.workerman.net/doc)
+- [Symfony Bundle 最佳实践](https://symfony.com/doc/current/bundles.html)
+- [Workerman GitHub](https://github.com/walkor/workerman)
