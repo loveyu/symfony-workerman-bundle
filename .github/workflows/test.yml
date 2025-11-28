@@ -53,4 +53,4 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
       - name: PHPStan analysis
-        run: ./vendor/bin/phpstan analyse
+        run: ./vendor/bin/phpstan analyse --configuration=phpstan.dist.neon
